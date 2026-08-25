@@ -45,9 +45,7 @@ class TestPrompts:
     def test_prompt_mentions_format(self):
         """Verifica se o prompt exige formato Markdown ou User Story padrão."""
         system_prompt = self.prompt.get("system_prompt", "")
-        format_keywords = ["como um", "eu quero", "para que", 
-                           "critérios de aceitação", "criterios de aceitacao", "dado que", 
-                           "quando", "então", "user story", "markdown"]
+        format_keywords = ["user story", "markdown"]
         has_format = any(kw in system_prompt.lower() for kw in format_keywords)
         assert has_format, "O prompt deve especificar o formato de User Story ou markdown"
 
