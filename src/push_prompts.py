@@ -24,6 +24,23 @@ PROMPT_NAME = "bug_to_user_story_v2"
 PROMPT_PATH = Path(__file__).parent.parent / "prompts" / "bug_to_user_story_v2.yml"
 USER_HANDLE = os.getenv("USERNAME_LANGSMITH_HUB")
 
+def generate_readme(description: str, techniques: list) -> str:
+    """
+    Gera o conteúdo do README.md com base nas técnicas aplicadas.
+
+    Args:
+        techniques: Lista de técnicas aplicadas
+
+    Returns:
+        Conteúdo do README.md
+    """
+    readme_content = f"## Descrição\n\n{description}\n\n"
+    if not techniques:
+        return readme_content
+    readme_content += "## Técnicas Aplicadas\n\n"
+    for technique in techniques:
+        readme_content += f"- {technique}\n"
+    return readme_content
 
 def push_prompt_to_langsmith(prompt_name: str, prompt_data: dict) -> bool:
     """
@@ -49,7 +66,7 @@ def push_prompt_to_langsmith(prompt_name: str, prompt_data: dict) -> bool:
             prompt_identifier=f"{USER_HANDLE}/{prompt_name}",
             object=template,
             tags=tags,
-            readme=tecnicas,
+            readme=generate_readme(descricao, tecnicas),
             description=descricao,
             is_public=True,
         )
