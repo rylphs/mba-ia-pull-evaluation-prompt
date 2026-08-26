@@ -21,10 +21,10 @@ from utils import load_yaml, check_env_vars, print_section_header
 
 load_dotenv()
 PROMPT_NAME = "bug_to_user_story_v2"
-PROMPT_PATH = Path(__file__).parent.parent / "prompts" / "bug_to_user_story_v2.yml"
+PROMPT_PATH = Path(__file__).parent.parent / "prompts" / f"{PROMPT_NAME}.yml"
 USER_HANDLE = os.getenv("USERNAME_LANGSMITH_HUB")
 
-def generate_readme(description: str, techniques: list) -> str:
+def generate_readme(description: str, techniques: list, created_at: str, version: str) -> str:
     """
     Gera o conteúdo do README.md com base nas técnicas aplicadas.
 
@@ -35,9 +35,11 @@ def generate_readme(description: str, techniques: list) -> str:
         Conteúdo do README.md
     """
     readme_content = f"## Descrição\n\n{description}\n\n"
+    readme_content += f"### Criado em\n\n{created_at}\n\n"
+    readme_content += f"### Versão\n\n{version}\n\n"
     if not techniques:
         return readme_content
-    readme_content += "## Técnicas Aplicadas\n\n"
+    readme_content += "### Técnicas Aplicadas\n\n"
     for technique in techniques:
         readme_content += f"- {technique}\n"
     return readme_content
@@ -60,13 +62,15 @@ def push_prompt_to_langsmith(prompt_name: str, prompt_data: dict) -> bool:
             ("human", prompt_data["user_prompt"]),
         ])
         tags = list(prompt_data.get("tags") or [])
-        tecnicas = prompt_data.get("techniques") or []
+        tecnicas = prompt_data.get("techniques_applied") or []
         descricao = prompt_data.get("description") or ""
+        created_at = prompt_data.get("created_at") or ""
+        version = prompt_data.get("version") or ""
         url = client.push_prompt(
             prompt_identifier=f"{USER_HANDLE}/{prompt_name}",
             object=template,
             tags=tags,
-            readme=generate_readme(descricao, tecnicas),
+            readme=generate_readme(descricao, tecnicas, created_at, version),
             description=descricao,
             is_public=True,
         )

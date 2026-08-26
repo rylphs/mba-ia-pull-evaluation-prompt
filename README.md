@@ -334,3 +334,111 @@ python src/evaluate.py
 - **Não altere os datasets de avaliação** - apenas os prompts em `prompts/bug_to_user_story_v2.yml`
 - **Itere, itere, itere** - é normal precisar de 3-5 iterações para atingir 0.8 em todas as métricas
 - **Documente seu processo** - a jornada de otimização é tão importante quanto o resultado final
+
+---
+
+## Solução
+
+### 1. Repositório público no GitHub:
+
+https://github.com/rylphs/mba-ia-pull-evaluation-prompt
+
+### 2. Técnicas Aplicadas:
+
+**Few-shot Learning**: Inclusão de exemplos completos de entrada e saída nos 3 níveis de complexidade. 
+Ajuda a definir a extensão, o nível de profundidade técnica e a estrutura de seções esperada, de acordo com a complexidade do bug relatado, eliminando variações indesejadas de formato.
+**Role Prompting**: Definição da persona de *Product Manager Sênior e Especialista em Engenharia de Software e Metodologias Ágeis*. Ajusta o vocabulário, e eleva o rigor técnico na formulação dos critérios de aceitação e arquitetura.
+**Chain of Thought (CoT)**:  Seção "PROCESSO DE RACIOCÍNIO PASSO A PASSO"` estruturada em 4 etapas (Compreensão $\rightarrow$ Classificação $\rightarrow$ Redação da Story $\rightarrow$ Formulação BDD/Técnica). Induz o modelo a trabalhar de forma organizada e analítca
+**Explicit Behavioral Rules & Edge Cases**: Regras de *Zero Alucinação*, persona específica, linguagem,  regras para segurança (HTTP 403/200), concorrência (locks), validação e SLAs de performance. Elimina alucinações e assegura que requisitos não funcionais cruciais (como segurança e resiliência) sejam refletidos nos critérios de aceitação.
+
+### 3. Resultados Finais:
+
+As avaliações foram feitas em 4 iterações, onde em cada iteração uma técnica foi adicionada e o prompt refinado. Abaixo segue um resumo comparativo das iterações:
+
+---
+
+#### Tabela Comparativa de Avaliação dos Prompts
+
+| Versão | Descrição da Versão | F1-Score *(Base)* | Clarity *(Base)* | Precision *(Base)* | Helpfulness *(Derivada)* | Correctness *(Derivada)* | Média Geral | Status |
+| :--- | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
+| **v1.0** | Versão inicial, sem alterações | 0.71 ✗ | 0.86 ✓ | 0.82 ✓ | 0.84 ✓ | 0.76 ✗ | **0.7970** | ❌ **Reprovado** *(F1 e Correctness < 0.8)* |
+| **v1.1** | Adição de persona *(Role Prompting)* | 0.77 ✗ | 0.89 ✓ | 0.89 ✓ | 0.89 ✓ | 0.83 ✓ | **0.8541** | ❌ **Reprovado** *(F1 < 0.8)* |
+| **v1.2** | Adição de Regras Explícitas e Chain of Thought | 0.79 ✗ | 0.89 ✓ | 0.87 ✓ | 0.88 ✓ | 0.83 ✓ | **0.8482** | ❌ **Reprovado** *(F1 < 0.8)* |
+| **v2.0** | Versão completa com Persona, Regras Explícitas, CoT e Few-shot | 0.81 ✓ | 0.88 ✓ | 0.84 ✓ | 0.86 ✓ | 0.82 ✓ | **0.8412** | ✅ **Aprovado** *(Todas as métricas $\ge$ 0.8)* |
+
+---
+
+### 4. Como Executar:
+
+1. Criação do `virtual env`:
+`python -m venv .venv` (No projeto foi utilizada a versão 3.11 do python)
+
+2. Após a criação do ambiente é necessário ativá-lo (linux):
+`source .venv/bin/activate`
+
+3. Copiar o arquivo `.env.example`, renoameá-lo para `.env` e definir todas as variáveis.
+
+4. Instalação das dependências: 
+`pip install -r requirements.txt`
+
+5. Para executar o pull do prompt `bug_to_user_story_v1`:
+`python src/pull_prompts.py`
+
+6. Para executar o push do prompt `bug_to_user_story_v2` no hub:
+`python src/push_prompts.py` 
+
+7. Para executar os testes unitários:
+`pytest tests/test_prompts.py`
+
+8. Para executar a avaliação do prmpt `bug_to_user_story_v2`(É necessário que o prompt tenha sido publicado no hub)
+`python src/evaluate.py`
+
+### 3. Evidências no LangSmith:
+
+- Link do prompt no hub: https://smith.langchain.com/hub/rylphs/bug_to_user_story_v2/205bd5fb
+
+- Link do dataset: https://smith.langchain.com/public/72c448ec-c446-4391-a86f-3d1a91b9a6e4/d
+
+- Screenshots das execuções:
+
+<figure>
+  <img src="results-eval/img/tracing.png" alt="Screenchot do Tracing no Langsmith" width="800">
+  <figcaption>Tracing no Langsmith</figcaption>
+</figure
+
+<figure>
+  <img src="results-eval/img/v1.0.png" alt="Screenshot da v1.0 no terminal" width="400">
+  <figcaption>Versão 1.0 - Execução no terminal</figcaption>
+</figure>
+
+<figure>
+  <img src="results-eval/img/v1.1.png" alt="Screenshot da v1.1 no terminal" width="400">
+  <figcaption>Versão 1.1 - Execução no terminal</figcaption>
+</figure>
+
+<figure>
+  <img src="results-eval/img/v1.2.png" alt="Screenshot da v1.2 no terminal" width="400">
+  <figcaption>Versão 1.2 - Execução no terminal</figcaption>
+</figure>
+
+<figure>
+  <img src="results-eval/img/v2.0.png" alt="Screenshot da v2.0 no terminal" width="400">
+  <figcaption>Versão 2.0 - Execução no terminal</figcaption>
+</figure>
+
+- Arquivos de registro das execuções (Markdown):
+
+[Versão 1.0](results-eval/v1.0.md)
+
+[Versão 1.1](results-eval/v1.1.md)
+
+[Versão 1.2](results-eval/v1.2.md)
+
+[Versão 2.0](results-eval/v2.0.md)
+
+
+
+
+
+
+---
