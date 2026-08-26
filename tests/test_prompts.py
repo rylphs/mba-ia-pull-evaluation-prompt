@@ -63,7 +63,7 @@ class TestPrompts:
 
     def test_minimum_techniques(self):
         """Verifica (através dos metadados do yaml) se pelo menos 2 técnicas foram listadas."""
-        techniques = self.prompt.get("techniques") or []
+        techniques = self.prompt.get("techniques_applied") or []
         assert isinstance(techniques, list), "As técnicas aplicadas devem ser uma lista"
         assert len(techniques) >= 2, f"Mínimo de 2 técnicas requeridas, encontradas: {len(techniques)}"
 
